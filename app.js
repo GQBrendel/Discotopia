@@ -17,4 +17,14 @@ console.log("Listen on Port: 2000");
 let io = require('socket.io') (serve,{});
 io.sockets.on('connection', function(socket) {
     console.log('socket connection'); //whenerver a connection happens this will be called
+
+
+    socket.on('something', function(data){
+        console.log("It's something because " + data.reason);
+    });
+
+
+    socket.emit('serverMsg', {
+        msg: 'hello client',
+    });
 });
