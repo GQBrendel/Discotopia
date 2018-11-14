@@ -1,22 +1,35 @@
-<canvas id = "ctx"  width = "500" height="500" style="border:1px solid #000000;">
-</canvas>
+<canvas id="ctx" width="500" height="500" style="border:1px solid #000000;"></canvas>
+ 
+<div id="chat-text" style="width:500px;height:100px;overflow-y:scroll">
+    <div>Hello!</div>
+</div>
+ 
+<form id="chat-form">
+    <input id="chat-input" type="text" style="width:500px"></input>
+</form>
 
 <script src = "https://cdn.socket.io/socket.io-1.4.5.js"></script>
 <script>
 
+    const chatText = document.getElementById('chat-text');
+    const chatInput = document.getElementById('chat-input');
+    const chatForm = document.getElementById('chat-form');
     let ctx = document.getElementById("ctx").getContext("2d");
     ctx.font = '30px Arial';
     let socket = io(); //initialize websocket connection
 
     const random = Math.random();
-
-
     socket.on('newPositions', function(data){
-        console.log("received pos " + data.length);
+        
         ctx.clearRect(0,0,500,500);
-        for (let i = 0; i < data.length; i++)
+        for (let i = 0; i < data.player.length; i++)
         {
-            ctx.fillText(data[i].number, data[i].x, data[i].y);
+            ctx.fillText(data.player[i].number, data.player[i].x, data.player[i].y);
+        }
+
+        for (let i = 0; i < data.bullet.length; i++)
+        {
+            ctx.fillRect(data.bullet[i].x-5,data.bullet[i].y-5,10,10);
         }
     });
 
@@ -40,6 +53,36 @@
             socket.emit('keyPress', {inputId:'left', state:false} );
         else if(event.keyCode === 87) //w
             socket.emit('keyPress', {inputId:'up', state:false} );
+    }
+
+    document.onmousedown = function(event){
+        socket.emit('keyPress', {inputId: 'attack', state:true});
+    }
+    document.onmouseup = function(event){
+        socket.emit('keyPress', {inputId: 'attack', state:false});
+    }
+    document.onmousemove = function(event){
+        var x = -250 + event.clientX - 8;
+        var y = -250 + event.clientY - 8;
+        var angle = Math.atan2(y,x) / Math.PI * 180;
+        socket.emit('keyPress',{inputId:'mouseAngle',state:angle});
+    }
+   
+
+    socket.on('addToChat',function(data){
+        chatText.innerHTML += '<div>' + data + '</div>';
+    });
+    socket.on('evalAnswer',function(data){
+        console.log(data);
+    });
+
+    chatForm.onsubmit = function(e){
+        e.preventDefault();
+        if(chatInput.value[0] === '/')
+            socket.emit('evalServer',chatInput.value.slice(1));
+        else
+            socket.emit('sendMsgToServer',chatInput.value);
+        chatInput.value = '';      
     }
 
 </script>
