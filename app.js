@@ -48,20 +48,18 @@ const Player = function(id){
     self.mouseAngle = 0;
     self.maxSpeed = 10;
 
-    
-
     let superUpdate = self.update;
 
     self.update = function (){
         self.updateSpeed();
         superUpdate();
         if(self.pressingAttack){
-//           self.shootBullet(self.mouseAngle);
+          self.shootBullet(self.mouseAngle);
 
            //upgraded shoot:
-           for (let i = -3; i < 3; i++)
+//           for (let i = -3; i < 3; i++)
            {
-               self.shootBullet(i *10 + self.mouseAngle);
+  //             self.shootBullet(i *10 + self.mouseAngle);
            }
         }
     }
@@ -87,6 +85,12 @@ const Player = function(id){
             self.spdY = 0;
     }
     Player.list[id] = self;
+    initPack.player.push({
+        id:self.id,
+        x:self.x,
+        y:self.y,  
+        number:self.number,
+    });
     return self;
 }
 Player.list = {};
@@ -127,17 +131,18 @@ Player.onConnect = function(socket) {
 }
 Player.onDisconnect = function(socket){
     delete Player.list[socket.id];
+    removePack.player.push(socket.id);
 }
-Player.update = function() {
-    const pack = [];
-    for (let i in Player.list) {
-    let player = Player.list[i];
-    player.update();
-    pack.push({
-            x: player.x,
-            y: player.y,
-            number: player.number
-        });
+Player.update = function(){
+    var pack = [];
+    for(var i in Player.list){
+        var player = Player.list[i];
+        player.update();
+        pack.push({
+            id:player.id,
+            x:player.x,
+            y:player.y,
+        });    
     }
     return pack;
 }
@@ -167,25 +172,29 @@ const Bullet = function(parent, angle){
         }
     }
     Bullet.list[self.id] = self;
+    initPack.bullet.push({
+        id:self.id,
+        x:self.x,
+        y:self.y,      
+    });
     return self;
 }
 Bullet.list = {};
 
-Bullet.update = function() {    
-        const pack = [];
-        for (let i in Bullet.list) {
-        let bullet = Bullet.list[i];
+Bullet.update = function(){
+    var pack = [];
+    for(var i in Bullet.list){
+        var bullet = Bullet.list[i];
         bullet.update();
-
-        if(bullet.toRemove) {
+        if(bullet.toRemove){
             delete Bullet.list[i];
-        }
-        else {
-                pack.push({
-                    x: bullet.x,
-                    y: bullet.y,
-                });
-        }
+            removePack.bullet.push(bullet.id);
+        } else
+            pack.push({
+                id:bullet.id,
+                x:bullet.x,
+                y:bullet.y,
+            });    
     }
     return pack;
 }
@@ -211,16 +220,24 @@ io.sockets.on('connection', function(socket) { //whenerver a connection happens 
     
 });
 
-setInterval (function () {
+var initPack = {player:[],bullet:[]};
+var removePack = {player:[],bullet:[]}; 
 
-    const pack = {
+setInterval(function(){
+    var pack = {
         player:Player.update(),
-        bullet: Bullet.update()
-    }   
-    
-    for (let i in SOCKET_LIST)
-    {
-        let socket = SOCKET_LIST[i];
-        socket.emit("newPositions", pack);   
+        bullet:Bullet.update(),
     }
-}, 1000/25);
+   
+    for(var i in SOCKET_LIST){
+        var socket = SOCKET_LIST[i];
+        socket.emit('init',initPack);
+        socket.emit('update',pack);
+        socket.emit('remove',removePack);
+    }
+    initPack.player = [];
+    initPack.bullet = [];
+    removePack.player = [];
+    removePack.bullet = [];
+   
+},1000/25);
