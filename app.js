@@ -36,8 +36,8 @@ const Entity = function() {
     return self;
 
 }
-const Player = function(id){
-    const self = Entity();
+var Player = function(id){
+    var self = Entity();
     self.id = id;
     self.number = "" + Math.floor(10 * Math.random()),
     self.pressingRight = false;
@@ -47,6 +47,9 @@ const Player = function(id){
     self.pressingAttack = false;
     self.mouseAngle = 0;
     self.maxSpeed = 10;
+    self.hp = 10;
+    self.hpMax = 10;
+    self.score = 0;
 
     let superUpdate = self.update;
 
@@ -194,9 +197,17 @@ const Bullet = function(parent, angle){
         for (let i in Player.list){ //loop on players to check the collision
            let p = Player.list[i];
             
-            if(self.getDistance(p) < 32 && self.parent !== p.id)
-            {
-                //handle collision (ex: lose HP)
+           if(self.getDistance(p) < 32 && self.parent !== p.id){
+                p.hp -= 1;
+                            
+                if(p.hp <= 0){
+                    var shooter = Player.list[self.parent];
+                    if(shooter)
+                        shooter.score += 1;
+                    p.hp = p.hpMax;
+                    p.x = Math.random() * 500;
+                    p.y = Math.random() * 500;                 
+                }
                 self.toRemove = true;
             }
         }
