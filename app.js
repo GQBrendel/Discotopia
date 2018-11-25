@@ -201,6 +201,7 @@ const Bullet = function(parent, angle){
     self.id = Math.random();
     self.spdX = Math.cos(angle/180*Math.PI) * 20;
     self.spdY = Math.sin(angle/180*Math.PI) * 20;
+    self.y = Infinity;
     self.parent = parent;
     self.timer = 0;
     self.toRemove = false;
