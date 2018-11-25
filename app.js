@@ -13,8 +13,10 @@ app.get('/', function(req, res) {
 
 app.use('/client' , express.static(__dirname + '/client'));
 
-serve.listen(2000);
-console.log("Listen on Port: 2000");
+var port = process.env.PORT || 2000;
+
+serve.listen(port);
+console.log("Listen on Port: " + port);
 
 let SOCKET_LIST = {};
 let id = 0;
