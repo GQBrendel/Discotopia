@@ -61,12 +61,13 @@ var Player = function(id){
         self.updateSpeed();
         superUpdate();
         if(self.pressingAttack){
-          self.shootBullet(self.mouseAngle);
+          
+          // self.shootBullet(self.mouseAngle);
 
            //upgraded shoot:
-//           for (let i = -3; i < 3; i++)
+           for (let i = -2; i < 2; i++)
            {
-  //             self.shootBullet(i *10 + self.mouseAngle);
+               self.shootBullet(i *10 + self.mouseAngle);
            }
         }
     }
@@ -138,7 +139,15 @@ Player.onConnect = function(socket) {
         else if(data.inputId === 'down')
             player.pressingDown = data.state;
         else if(data.inputId === 'attack')
-            player.pressingAttack = data.state;
+        {
+            if(data.canAttack && data.state)
+            {
+                player.pressingAttack = true;
+            }
+            else{
+                player.pressingAttack = false;
+            }
+        }
         else if(data.inputId === 'mouseAngle')
             player.mouseAngle = data.state;
    });
@@ -188,8 +197,8 @@ Player.update = function(){
 const Bullet = function(parent, angle){
     const self = Entity();
     self.id = Math.random();
-    self.spdX = Math.cos(angle/180*Math.PI) * 10;
-    self.spdY = Math.sin(angle/180*Math.PI) * 10;
+    self.spdX = Math.cos(angle/180*Math.PI) * 20;
+    self.spdY = Math.sin(angle/180*Math.PI) * 20;
     self.parent = parent;
     self.timer = 0;
     self.toRemove = false;

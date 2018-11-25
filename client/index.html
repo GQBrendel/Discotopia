@@ -181,11 +181,23 @@
             socket.emit('keyPress', {inputId:'up', state:false} );
     }
 
+    var canThisPlayerAttack = true;
     document.onmousedown = function(event){
-        socket.emit('keyPress', {inputId: 'attack', state:true});
+        if(!canThisPlayerAttack)
+            return;
+
+        socket.emit('keyPress', {inputId: 'attack', state:true, canAttack:canThisPlayerAttack});        
+        window.setTimeout(function() {
+            canThisPlayerAttack = false;
+            socket.emit('keyPress', {inputId: 'attack', state:false, canAttack:false});
+
+                    window.setTimeout(function() {
+                    canThisPlayerAttack = true;
+                }, 500);
+         }, 200);
     }
     document.onmouseup = function(event){
-        socket.emit('keyPress', {inputId: 'attack', state:false});
+        //socket.emit('keyPress', {inputId: 'attack', state:false});
     }
     document.onmousemove = function(event){
         var x = -(WIDTH/2) + event.clientX - 8;
