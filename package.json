@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {    
+  "scripts": {
     "start": "node app.js"
   },
   "author": "",
@@ -12,8 +12,8 @@
     "express": "^4.16.3",
     "socket.io": "^2.1.1"
   },
-  "engines":{
-    "node": "4.1.x"
+  "engines": {
+    "node": "10.13.x"
   },
   "devDependencies": {}
 }
