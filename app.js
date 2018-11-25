@@ -3,6 +3,10 @@ var express = require('express');
 var app = express();
 var serve = require('http').Server(app);
 
+const WIDTH = 1400;
+const HEIGHT = 700;
+
+
 app.get('/', function(req, res) {
     res.sendFile(__dirname + '/client/index.html');
 });
@@ -17,8 +21,8 @@ let id = 0;
 
 const Entity = function() {
     const self = {
-        x:250,
-        y:250,
+        x:WIDTH/2,
+        y:HEIGHT/2,
         spdX: 0,
         spdY: 0,
         id:""
@@ -138,11 +142,12 @@ Player.onConnect = function(socket) {
         else if(data.inputId === 'mouseAngle')
             player.mouseAngle = data.state;
    });
-
-   socket.emit('init',{
-    player:Player.getAllInitPack(),
-    bullet:Bullet.getAllInitPack(),
-    })
+   
+	socket.emit('init',{
+		selfId:socket.id,
+		player:Player.getAllInitPack(),
+		bullet:Bullet.getAllInitPack(),
+	})
 
    socket.on('sendMsgToServer',function(data){
     //let playerName = ("" + socket.id).slice(2,7);
@@ -205,8 +210,8 @@ const Bullet = function(parent, angle){
                     if(shooter)
                         shooter.score += 1;
                     p.hp = p.hpMax;
-                    p.x = Math.random() * 500;
-                    p.y = Math.random() * 500;                 
+                    p.x = Math.random() * WIDTH;
+                    p.y = Math.random() * HEIGHT;                 
                 }
                 self.toRemove = true;
             }
